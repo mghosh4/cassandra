@@ -19,6 +19,8 @@ package org.apache.cassandra.utils;
 
 import java.nio.ByteBuffer;
 
+import org.apache.cassandra.utils.obs.IBitSet;
+
 public class AlwaysPresentFilter implements IFilter
 {
     public boolean isPresent(ByteBuffer key)
@@ -33,4 +35,28 @@ public class AlwaysPresentFilter implements IFilter
     public void close() { }
 
     public long serializedSize() { return 0; }
+
+	@Override
+	public IFilter merge(IFilter second) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long cardinality() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public IBitSet getBitSet() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void mergeInPlace(IFilter second) {
+		// TODO Auto-generated method stub
+		
+	}
 }

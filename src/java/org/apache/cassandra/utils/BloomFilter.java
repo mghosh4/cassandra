@@ -115,4 +115,24 @@ public abstract class BloomFilter implements IFilter
     {
         bitset.close();
     }
+    
+    public IFilter merge(IFilter second)
+    {
+    	return new Murmur3BloomFilter(this.hashCount, this.bitset.union(second.getBitSet()));
+    }
+    
+    public void mergeInPlace(IFilter second)
+    {
+    	this.bitset.unionInPlace(second.getBitSet());
+    }
+    
+    public IBitSet getBitSet()
+    {
+    	return bitset;
+    }
+    
+    public long cardinality()
+    {
+    	return bitset.cardinality();
+    }
 }

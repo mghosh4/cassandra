@@ -51,4 +51,11 @@ public interface IBitSet extends Closeable
     public void clear();
 
     public void close();
+    
+    /** @return the number of set bits */
+    public long cardinality();
+
+	public IBitSet union(IBitSet bitSet);
+	
+	public void unionInPlace(IBitSet bitSet);
 }

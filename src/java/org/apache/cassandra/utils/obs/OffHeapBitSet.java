@@ -20,6 +20,9 @@ package org.apache.cassandra.utils.obs;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.cassandra.db.TypeSizes;
 import org.apache.cassandra.io.util.Memory;
@@ -80,6 +83,47 @@ public class OffHeapBitSet implements IBitSet
     public void set(long offset, byte b)
     {
         bytes.setByte(offset, b);
+    }
+      
+    /** @return the number of set bits */
+    public long cardinality()
+    {
+    	ByteBuffer bb[] = bytes.asByteBuffers();
+    	byte[] bArr = new byte[bb[0].capacity()];
+    	int count = 0;
+    	for (ByteBuffer b : bb)
+    	{
+    		b.get(bArr);
+    		count += ByteArrayHelpers.countBits(bArr);
+    	}
+    	return count;
+    }
+    
+    public static class ByteArrayHelpers
+    {
+        private static Map<Integer,Integer> LookupTable = new HashMap<Integer, Integer>(); 
+
+        static {
+        	for (int value = 0; value <= 256; value++)
+        	{
+        		int count = 0;
+        		for (int i=0; i < 8; i++)
+        		{
+        			count += (value >> i) & 1;
+        		}
+        		LookupTable.put(value, count);
+        	}
+        }
+
+        public static int countBits(byte[] array)
+        {
+            int count = 0;
+            for (byte b : array)
+            {
+                count += LookupTable.get(b);
+            }
+            return count;
+        }
     }
 
     public void clear(long index)
@@ -166,4 +210,33 @@ public class OffHeapBitSet implements IBitSet
         }
         return (int) ((h >> 32) ^ h) + 0x98761234;
     }
+    
+    public Memory getMemory()
+    {
+    	return bytes;
+    }
+
+	@Override
+	public IBitSet union(IBitSet bitSet) {
+		Memory outBuf = Memory.allocate(bytes.size());
+		OffHeapBitSet secSet = (OffHeapBitSet) bitSet;
+		
+		for (int i = 0; i < bytes.size() / 8; i++)
+		{
+			long out = this.bytes.getLong(i * 8) | secSet.getMemory().getLong(i * 8);
+			outBuf.setLong(i * 8, out);
+		}
+		return new OffHeapBitSet(outBuf);
+	}
+
+	@Override
+	public void unionInPlace(IBitSet bitSet) {
+		OffHeapBitSet secSet = (OffHeapBitSet) bitSet;
+		
+		for (int i = 0; i < bytes.size() / 8; i++)
+		{
+			long out = this.bytes.getLong(i * 8) | secSet.getMemory().getLong(i * 8);
+			this.bytes.setLong(i * 8, out);
+		}
+	}
 }

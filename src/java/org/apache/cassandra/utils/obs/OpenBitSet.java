@@ -437,4 +437,16 @@ public class OpenBitSet implements IBitSet
     }
     return bs;
   }
+
+  	@Override
+	public IBitSet union(IBitSet bitSet) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void unionInPlace(IBitSet bitSet) {
+		// TODO Auto-generated method stub
+		
+	}
 }

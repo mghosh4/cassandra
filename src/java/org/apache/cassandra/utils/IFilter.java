@@ -20,6 +20,8 @@ package org.apache.cassandra.utils;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 
+import org.apache.cassandra.utils.obs.IBitSet;
+
 public interface IFilter extends Closeable
 {
     void add(ByteBuffer key);
@@ -31,4 +33,12 @@ public interface IFilter extends Closeable
     long serializedSize();
 
     void close();
+    
+    IFilter merge(IFilter second);
+    
+    void mergeInPlace(IFilter second);
+    
+    long cardinality();
+    
+    IBitSet getBitSet();
 }
